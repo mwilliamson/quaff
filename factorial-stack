@@ -1,0 +1,29 @@
+fun factorial(n) {
+    total = 1
+    while (n > 0) {
+       total *= n
+       n--
+    }
+    return n
+}
+
+
+const 1
+swap
+const 0
+cmp
+if lte +5
+mult
+dec
+jmp - 6
+
+
+
+
+5
+1
+
+
+n
+n     <-
+total <-

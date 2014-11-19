@@ -1,0 +1,8 @@
+.#*
+*.so
+*.o
+*.a
+/_cython/
+*.egg-info
+_quaff_py_install
+quaff_py.c
