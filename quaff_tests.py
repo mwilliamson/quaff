@@ -60,6 +60,21 @@ def test_cmp_ints_small_to_big():
     vm.run([quaff.inst_const(7), quaff.inst_const(42), quaff.inst_cmp()])
     assert_stack_elements(vm, [-1])
 
+def test_add_consts():
+    vm = quaff.VirtualMachine()
+    vm.run([quaff.inst_const(7), quaff.inst_const(42), quaff.inst_add()])
+    assert_stack_elements(vm, [49])
+
+def test_multiply_consts():
+    vm = quaff.VirtualMachine()
+    vm.run([quaff.inst_const(7), quaff.inst_const(6), quaff.inst_mul()])
+    assert_stack_elements(vm, [42])
+
+def test_jmp():
+    vm = quaff.VirtualMachine()
+    vm.run([quaff.inst_const(1), quaff.inst_jmp(1), quaff.inst_const(2), quaff.inst_const(3)])
+    assert_stack_elements(vm, [3, 1])
+
 
 def assert_stack_elements(vm, elements):
     actual = map(vm.read_stack_int32, range(len(elements)))

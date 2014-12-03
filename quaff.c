@@ -1,7 +1,12 @@
 #include "stdlib.h"
 #include "string.h"
+#include "stdio.h"
 
 #include "quaff.h"
+
+#define INST_CODE_ADD (5)
+#define INST_CODE_MUL (6)
+#define INST_CODE_JMP (7)
 
 void swap(int32_t* a, int32_t* b) {
   int32_t t = *a;
@@ -16,9 +21,6 @@ QuaffVM* quaff_vm_create() {
   vm->stack_length = 0;
   return vm;
 }
-
-// 0123
-// CC.I
 
 QuaffInstruction quaff_inst_const(int16_t value) {
   return value << 16;
@@ -40,6 +42,18 @@ QuaffInstruction quaff_inst_cmp(void) {
   return 4;
 }
 
+QuaffInstruction quaff_inst_add(void) {
+  return INST_CODE_ADD;
+}
+
+QuaffInstruction quaff_inst_mul(void) {
+  return INST_CODE_MUL;
+}
+
+QuaffInstruction quaff_inst_jmp(int16_t offset) {
+  return INST_CODE_JMP + (offset << 16);
+}
+
 void ensure_capacity(QuaffVM* vm, size_t minimum_capacity) {
   if (minimum_capacity > vm->stack_capacity) {
     int32_t* old_stack = vm->stack;
@@ -52,39 +66,66 @@ void ensure_capacity(QuaffVM* vm, size_t minimum_capacity) {
   }
 }
 
-void quaff_vm_run_instruction(QuaffVM* vm, QuaffInstruction instruction) {
+int32_t op_cmp(int32_t arg1, int32_t arg2) {
+  return arg1 > arg2 ? 1 : arg1 < arg2 ? -1 : 0;
+}
+
+int32_t op_add(int32_t arg1, int32_t arg2) {
+  return arg1 + arg2;
+}
+
+int32_t op_mul(int32_t arg1, int32_t arg2) {
+  return arg1 * arg2;
+}
+
+void quaff_vm_binary_operation(QuaffVM* vm, int32_t (*op)(int32_t, int32_t)) {
+  int arg1 = vm->stack[vm->stack_length - 2];
+  int arg2 = vm->stack[vm->stack_length - 1];
+  int result = op(arg1, arg2);
+  vm->stack_length--;
+  vm->stack[vm->stack_length - 1] = result;
+}
+
+size_t quaff_vm_run_instruction(QuaffVM* vm, QuaffInstruction instruction) {
+  // 0123
+  // CC.I
   switch (instruction & 0x000000ff) {
   case 0: // const
     ensure_capacity(vm, vm->stack_length + 1);
     vm->stack[vm->stack_length++] = instruction >> 16;
-    return;
+    return 0;
   case 1: // pop
     vm->stack_length--;
-    return;
+    return 0;
   case 2: // dup
     ensure_capacity(vm, vm->stack_length + 1);
     size_t top_index = vm->stack_length - 1;
     vm->stack[vm->stack_length++] = vm->stack[top_index];
-    return;
+    return 0;
   case 3: // swap
     ;
     int depth = instruction >> 16;
     swap(&vm->stack[vm->stack_length - 1], &vm->stack[vm->stack_length - depth - 1]);
-    return;
+    return 0;
   case 4: // cmp
-    ;
-    int arg1 = vm->stack[vm->stack_length - 2];
-    int arg2 = vm->stack[vm->stack_length - 1];
-    int result = arg1 > arg2 ? 1 : arg1 < arg2 ? -1 : 0;
-    vm->stack_length--;
-    vm->stack[vm->stack_length - 1] = result;
-    return;
+    quaff_vm_binary_operation(vm, op_cmp);
+    return 0;
+  case INST_CODE_ADD:
+    quaff_vm_binary_operation(vm, op_add);
+    return 0;
+  case INST_CODE_MUL:
+    quaff_vm_binary_operation(vm, op_mul);
+    return 0;
+  case INST_CODE_JMP:
+    return instruction >> 16;
+  default:
+    return 0;
   }
 }
 
 void quaff_vm_run(QuaffVM* vm, QuaffInstruction* instructions, size_t instructions_length) {
-  for (int i = 0; i < instructions_length; ++i) {
-    quaff_vm_run_instruction(vm, instructions[i]);
+  for (size_t i = 0; i < instructions_length; ++i) {
+    i += quaff_vm_run_instruction(vm, instructions[i]);
   }
 }
 

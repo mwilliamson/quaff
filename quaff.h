@@ -18,9 +18,13 @@ QuaffInstruction quaff_inst_pop(void);
 QuaffInstruction quaff_inst_dup(void);
 QuaffInstruction quaff_inst_swap(int16_t depth);
 QuaffInstruction quaff_inst_cmp(void);
+QuaffInstruction quaff_inst_add(void);
+QuaffInstruction quaff_inst_mul(void);
+QuaffInstruction quaff_inst_jmp(int16_t offset);
 
 void quaff_vm_run(QuaffVM*, QuaffInstruction* instructions, size_t instructions_length);
 int32_t quaff_vm_read_stack_int32(QuaffVM*, int index);
+
 void quaff_vm_destroy(QuaffVM*);
 
 #endif
