@@ -13,6 +13,11 @@ def test_const_2():
     vm.run([quaff.inst_const(2)])
     assert_stack_elements(vm, [2])
 
+def test_negative_const():
+    vm = quaff.VirtualMachine()
+    vm.run([quaff.inst_const(-1)])
+    assert_stack_elements(vm, [-1])
+
 def test_multiple_consts():
     vm = quaff.VirtualMachine()
     vm.run([quaff.inst_const(42), quaff.inst_const(64)])
@@ -75,7 +80,70 @@ def test_jmp():
     vm.run([quaff.inst_const(1), quaff.inst_jmp(1), quaff.inst_const(2), quaff.inst_const(3)])
     assert_stack_elements(vm, [3, 1])
 
+def test_jle_does_jump_when_less_than():
+    vm = quaff.VirtualMachine()
+    vm.run([
+        quaff.inst_const(42),
+        quaff.inst_const(2),
+        quaff.inst_const(4),
+        quaff.inst_cmp(),
+        quaff.inst_jle(1),
+        quaff.inst_const(43),
+        quaff.inst_const(44),
+    ])
+    assert_stack_elements(vm, [44, 42])
+
+def test_jle_does_jump_when_equal():
+    vm = quaff.VirtualMachine()
+    vm.run([
+        quaff.inst_const(42),
+        quaff.inst_const(2),
+        quaff.inst_const(2),
+        quaff.inst_cmp(),
+        quaff.inst_jle(1),
+        quaff.inst_const(43),
+        quaff.inst_const(44),
+    ])
+    assert_stack_elements(vm, [44, 42])
+
+def test_jle_doesnt_jump_when_greater_than():
+    vm = quaff.VirtualMachine()
+    vm.run([
+        quaff.inst_const(42),
+        quaff.inst_const(4),
+        quaff.inst_const(2),
+        quaff.inst_cmp(),
+        quaff.inst_jle(1),
+        quaff.inst_const(43),
+    ])
+    assert_stack_elements(vm, [43, 42])
+
+
+def test_can_calculate_factorial():
+    vm = quaff.VirtualMachine()
+    vm.run([
+        # n:
+        quaff.inst_const(6),  # [6]
+        # n!:
+        quaff.inst_const(1),  # [T1, 6]
+        quaff.inst_swap(1),   # [6, T1]
+        quaff.inst_dup(),     # [6, 6, T1]
+        quaff.inst_const(0),  # [0, 6, 6, T1]
+        quaff.inst_cmp(),     # [1, 6, T1]
+        quaff.inst_jle(7),    # [6, T1]
+        quaff.inst_dup(),     # [6, 6, T1]
+        quaff.inst_swap(2),   # [T1, 6, 6]
+        quaff.inst_mul(),     # [T6, 6]
+        quaff.inst_swap(1),   # [6, T6]
+        quaff.inst_const(-1), # [-1, 6, T6]
+        quaff.inst_add(),     # [5, T6]
+        quaff.inst_jmp(-11),
+        quaff.inst_pop(),
+    ])
+    assert_stack_elements(vm, [720])
+
 
 def assert_stack_elements(vm, elements):
     actual = map(vm.read_stack_int32, range(len(elements)))
     assert_equal(elements, actual)
+    # TODO: Assert stack size

@@ -21,6 +21,7 @@ cdef extern from "quaff.h":
      QuaffInstruction quaff_inst_add()
      QuaffInstruction quaff_inst_mul()
      QuaffInstruction quaff_inst_jmp(int16_t offset)
+     QuaffInstruction quaff_inst_jle(int16_t offset)
 
      void quaff_vm_run(QuaffVM*, QuaffInstruction* instructions, size_t instructions_length)
      int32_t quaff_vm_read_stack_int32(QuaffVM*, int index)
@@ -49,6 +50,9 @@ def inst_mul():
 
 def inst_jmp(offset):
     return quaff_inst_jmp(offset)
+
+def inst_jle(offset):
+    return quaff_inst_jle(offset)
 
 cdef class VirtualMachine(object):
     cdef QuaffVM* _vm

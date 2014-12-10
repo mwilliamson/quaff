@@ -7,6 +7,7 @@
 #define INST_CODE_ADD (5)
 #define INST_CODE_MUL (6)
 #define INST_CODE_JMP (7)
+#define INST_CODE_JLE (8)
 
 void swap(int32_t* a, int32_t* b) {
   int32_t t = *a;
@@ -52,6 +53,10 @@ QuaffInstruction quaff_inst_mul(void) {
 
 QuaffInstruction quaff_inst_jmp(int16_t offset) {
   return INST_CODE_JMP + (offset << 16);
+}
+
+QuaffInstruction quaff_inst_jle(int16_t offset) {
+  return INST_CODE_JLE + (offset << 16);
 }
 
 void ensure_capacity(QuaffVM* vm, size_t minimum_capacity) {
@@ -118,6 +123,15 @@ size_t quaff_vm_run_instruction(QuaffVM* vm, QuaffInstruction instruction) {
     return 0;
   case INST_CODE_JMP:
     return instruction >> 16;
+  case INST_CODE_JLE:
+    ;
+    int32_t condition = vm->stack[vm->stack_length - 1];
+    vm->stack_length--;
+    if (condition < 1) {
+      return instruction >> 16;
+    } else {
+      return 0;
+    }
   default:
     return 0;
   }
