@@ -25,6 +25,7 @@ cdef extern from "quaff.h":
 
      void quaff_vm_run(QuaffVM*, QuaffInstruction* instructions, size_t instructions_length)
      int32_t quaff_vm_read_stack_int32(QuaffVM*, int index)
+     size_t quaff_vm_stack_length(QuaffVM*)
      void quaff_vm_destroy(QuaffVM*)
 
 def inst_const(value):
@@ -74,3 +75,6 @@ cdef class VirtualMachine(object):
 
     def read_stack_int32(self, index):
         return quaff_vm_read_stack_int32(self._vm, index)
+
+    def stack_length(self):
+        return quaff_vm_stack_length(self._vm)

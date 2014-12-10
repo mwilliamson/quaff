@@ -144,6 +144,5 @@ def test_can_calculate_factorial():
 
 
 def assert_stack_elements(vm, elements):
-    actual = map(vm.read_stack_int32, range(len(elements)))
+    actual = map(vm.read_stack_int32, range(vm.stack_length()))
     assert_equal(elements, actual)
-    # TODO: Assert stack size

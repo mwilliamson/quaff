@@ -147,6 +147,10 @@ int32_t quaff_vm_read_stack_int32(QuaffVM* vm, int index) {
   return vm->stack[vm->stack_length - index - 1];
 }
 
+size_t quaff_vm_stack_length(QuaffVM* vm) {
+  return vm->stack_length;
+}
+
 void quaff_vm_destroy(QuaffVM* vm) {
   free(vm->stack);
   free(vm);
