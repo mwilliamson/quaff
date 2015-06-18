@@ -7,3 +7,4 @@
 _quaff_py_install
 quaff_py.c
 *.pyc
+/quaff
