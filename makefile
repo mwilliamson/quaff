@@ -1,7 +1,7 @@
 .PHONY: test py_test
 
-quaff: *.h *.c
-	gcc *.c -o quaff -Wall -Werror -std=c99
+quaff: *.h main.c quaff.c
+	gcc main.c quaff.c -o quaff -Wall -Werror -std=c99
 
 quaff.o: *.h *.c
 	gcc -fPIC -c quaff.c -o quaff.o -Wall -Werror -std=c99
